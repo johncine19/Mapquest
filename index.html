@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MapQuest Route Planner</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="page-shell">
+    <header class="hero">
+      <div class="hero-grid">
+        <div class="hero-copy-block">
+          <p class="eyebrow">MapQuest API Integration</p>
+          <h1>Plan every trip in a polished atlas-style dashboard.</h1>
+          <p class="hero-copy">
+            Enter an origin and destination to generate turn-by-turn directions, route metrics,
+            and a live map preview powered by the MapQuest Directions API.
+          </p>
+          <div class="hero-highlights" aria-label="Feature highlights">
+            <span>Fastest route lookup</span>
+            <span>Live static map preview</span>
+            <span>Readable maneuver breakdown</span>
+          </div>
+        </div>
+
+        <aside class="hero-card" aria-label="Planner overview">
+          <p class="hero-card-label">Trip Console</p>
+          <div class="hero-card-stat">
+            <strong>01</strong>
+            <span>Map and summary panels update together after each successful request.</span>
+          </div>
+          <div class="hero-card-stat">
+            <strong>02</strong>
+            <span>Execution history stays visible so repeated runs are easier to track.</span>
+          </div>
+          <div class="hero-card-stat">
+            <strong>03</strong>
+            <span>Inputs, tables, and preview now follow one cohesive travel-themed interface.</span>
+          </div>
+        </aside>
+      </div>
+    </header>
+
+    <main class="layout">
+      <section class="panel panel-form">
+        <div class="panel-header">
+          <div>
+            <p class="panel-kicker">Route Input</p>
+            <h2>Trip Details</h2>
+            <p class="section-lead">Use place names, campuses, landmarks, or city addresses to build a route.</p>
+          </div>
+        </div>
+
+        <form id="route-form" class="trip-form">
+          <div class="field-group">
+            <label for="start">Starting Location</label>
+            <input id="start" name="start" type="text"
+                   placeholder="e.g. NMSC Main Campus, Tangub City" required>
+          </div>
+
+          <div class="field-group">
+            <label for="destination">Destination</label>
+            <input id="destination" name="destination" type="text"
+                   placeholder="e.g. Plaza Germania, Ozamiz City" required>
+          </div>
+
+          <p class="field-note">Press Enter or use the action button to fetch the route.</p>
+
+          <button class="btn-primary" id="submit-btn" type="submit">
+            <span class="btn-icon" aria-hidden="true">Route</span>
+            <span>Get Route</span>
+          </button>
+
+          <div id="status" class="status" data-tone="default" aria-live="polite">
+            Ready. Enter two locations to request directions.
+          </div>
+        </form>
+      </section>
+
+      <section class="panel panel-map">
+        <div class="panel-header panel-header-split">
+          <div>
+            <p class="panel-kicker">Live Preview</p>
+            <h2>Route Preview</h2>
+            <p class="section-lead">The map updates after each request and keeps the route endpoints visible.</p>
+          </div>
+          <span class="panel-badge" id="run-counter">Runs recorded: 0</span>
+        </div>
+
+        <div class="map-frame">
+          <div class="map-labels" id="map-labels" hidden>
+            <div class="map-label start-label" id="label-start">
+              <span class="dot"></span>
+              <span id="label-start-text"></span>
+            </div>
+            <div class="map-label end-label" id="label-end">
+              <span class="dot"></span>
+              <span id="label-end-text"></span>
+            </div>
+          </div>
+
+          <img id="route-map" alt="Map preview" src="" hidden>
+          <div id="map-placeholder" class="map-placeholder">
+            <div class="map-placeholder-inner">
+              <div class="map-placeholder-title">Awaiting route preview</div>
+              <div class="map-placeholder-text">The map will render here after you request directions.</div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <div class="tables-grid">
+      <article class="panel">
+        <div class="panel-header">
+          <div>
+            <p class="panel-kicker">Request Data</p>
+            <h2>Request Inputs</h2>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Field</th><th>Value</th></tr>
+            </thead>
+            <tbody id="request-table-body">
+              <tr><td colspan="2">No request submitted yet.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </article>
+
+      <article class="panel">
+        <div class="panel-header">
+          <div>
+            <p class="panel-kicker">Response Data</p>
+            <h2>API Response Summary</h2>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Output</th><th>Value</th></tr>
+            </thead>
+            <tbody id="summary-table-body">
+              <tr><td colspan="2">No response data yet.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </article>
+    </div>
+
+    <section class="panel table-section">
+      <div class="panel-header">
+        <div>
+          <p class="panel-kicker">Turn By Turn</p>
+          <h2>Route Maneuvers</h2>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Step</th>
+              <th>Narrative</th>
+              <th>Distance</th>
+              <th>Time</th>
+            </tr>
+          </thead>
+          <tbody id="maneuvers-table-body">
+            <tr><td colspan="4">Directions steps will appear here.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-header">
+        <div>
+          <p class="panel-kicker">Run History</p>
+          <h2>Execution Log</h2>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Run</th>
+              <th>Start</th>
+              <th>Destination</th>
+              <th>Distance</th>
+              <th>Time</th>
+            </tr>
+          </thead>
+          <tbody id="history-table-body">
+            <tr><td colspan="5">Complete three runs and take a screenshot after each one.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
